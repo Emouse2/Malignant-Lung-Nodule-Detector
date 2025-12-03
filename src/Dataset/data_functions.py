@@ -23,30 +23,24 @@ def heading_to_heading(labels_path, heading_in, heading_out, data):
     return target_rows[heading_out]
 
 def get_ct_folder(images_path, labels_path, patient_id):
-    target_series_number = heading_to_heading(
+    target_instance_uid = heading_to_heading(
         labels_path=labels_path,
         heading_in=["patient_id"],
-        heading_out=["series"],
+        heading_out=["instance_uid"],
         data=[patient_id]
     )
-    series_number = target_series_number.values.tolist()[0][0]
-    try:
-        series_number = str(int(series_number))
-    except ValueError:
-        series_number = "NA"
+    instance_uid = target_instance_uid.values.tolist()[0][0]
     patient_folder = os.path.join(images_path, patient_id)
 
     dicom_folder = ""
     for folder in os.listdir(patient_folder):
-        if folder.startswith("."):
-            continue
         image_scan_folders_parent = os.path.join(patient_folder, folder)
+        if not os.path.isdir(image_scan_folders_parent):
+            continue
         for folder_2 in os.listdir(image_scan_folders_parent):
-            if not folder_2.startswith("."):
-                split_name = folder_2.split(".")[0]
-                split_name = split_name.split("-")[0]
-                if split_name == series_number:
-                    dicom_folder = os.path.join(image_scan_folders_parent, folder_2)
+            folder_2_dir = os.path.join(image_scan_folders_parent, folder_2)
+            if os.path.isdir(folder_2_dir) and folder_2 == instance_uid:
+                dicom_folder = os.path.join(image_scan_folders_parent, folder_2)
     if dicom_folder != "":
         return dicom_folder
 
