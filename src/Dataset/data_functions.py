@@ -26,7 +26,7 @@ def get_ct_folder(images_path, labels_path, patient_id):
     target_series_number = heading_to_heading(
         labels_path=labels_path,
         heading_in=["patient_id"],
-        heading_out=["series_number"],
+        heading_out=["series"],
         data=[patient_id]
     )
     series_number = target_series_number.values.tolist()[0][0]
