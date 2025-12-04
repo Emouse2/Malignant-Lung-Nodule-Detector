@@ -43,6 +43,7 @@ def get_ct_folder(images_path, labels_path, patient_id):
                 dicom_folder = os.path.join(image_scan_folders_parent, folder_2)
     if dicom_folder != "":
         return dicom_folder
+    
 
 def load_ct_series(ct_folder):
     slices = []
