@@ -44,6 +44,17 @@ def get_ct_folder(images_path, labels_path, patient_id):
     if dicom_folder != "":
         return dicom_folder
 
+def load_ct_series(ct_folder):
+    slices = []
+    for f in os.listdir(ct_folder):
+        if f.endswith(".dcm"):
+            ds = pydicom.dcmread(os.path.join(ct_folder, f))
+            z = float(ds.ImagePositionPatient[2])
+            slices.append((z, ds))
+    slices.sort(key=lambda x: x[0])
+    volume = np.stack([ds.pixel_array for (_, ds) in slices], axis=0)
+    return slices, volume
+
 def get_slice_index(slices, z_slice):
     z_positions = [z for (z, ds) in slices]
     diff = [abs(z - z_slice) for z in z_positions]
@@ -68,14 +79,7 @@ def plot_nodule(highlight: bool, images_path, labels_path, instance_uid, nodule_
         patient_id
     )
 
-    slices = []
-    for f in os.listdir(ct_folder):
-        if f.endswith(".dcm"):
-            ds = pydicom.dcmread(os.path.join(ct_folder, f))
-            z = float(ds.ImagePositionPatient[2])
-            slices.append((z, ds))
-    slices.sort(key=lambda x: x[0])
-    volume = np.stack([ds.pixel_array for (_, ds) in slices], axis=0)
+    slices, volume = load_ct_series(ct_folder)
     slice_index = get_slice_index(slices, z_slice)
 
     image = volume[int(slice_index)]
